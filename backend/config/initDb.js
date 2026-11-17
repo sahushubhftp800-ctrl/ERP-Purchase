@@ -116,6 +116,9 @@ async function autoMigrate() {
 
     try { await db.query('ALTER TABLE order_status_history ADD COLUMN status VARCHAR(50) NOT NULL;'); } catch (_) {}
     try { await db.query('ALTER TABLE order_status_history ADD COLUMN comment TEXT;'); } catch (_) {}
+    try { await db.query('ALTER TABLE order_status_history MODIFY COLUMN new_status VARCHAR(50) DEFAULT NULL;'); } catch (_) {}
+    try { await db.query('ALTER TABLE order_status_history MODIFY COLUMN previous_status VARCHAR(50) DEFAULT NULL;'); } catch (_) {}
+    try { await db.query('ALTER TABLE order_status_history MODIFY COLUMN comments TEXT DEFAULT NULL;'); } catch (_) {}
 
     // 7. audit_logs table
     await db.query(`
