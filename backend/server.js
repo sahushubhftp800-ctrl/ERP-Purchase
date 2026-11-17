@@ -22,6 +22,9 @@ const aiRoutes = require('./routes/aiRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust reverse proxies (Railway, Render, Cloudflare, Vercel)
+app.set('trust proxy', 1);
+
 // Security Middlewares (configured to allow inline styles/fonts for ERP UI)
 app.use(helmet({
   contentSecurityPolicy: false
