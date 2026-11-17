@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const logAudit = require('../utils/auditLogger');
 
 // Get All Products (with search, category filter, stock level filter)
 exports.getProducts = async (req, res) => {
@@ -113,10 +114,7 @@ exports.createProduct = async (req, res) => {
     );
 
     // Audit log
-    await db.query(
-      'INSERT INTO audit_logs (user_id, action, details) VALUES (?, ?, ?)',
-      [req.user.id, 'CREATE_PRODUCT', `Added product: ${product_name} (${sku})`]
-    );
+    await logAudit(req.user.id, 'CREATE_PRODUCT', `Added product: ${product_name} (${sku})`);
 
     res.status(201).json({
       success: true,

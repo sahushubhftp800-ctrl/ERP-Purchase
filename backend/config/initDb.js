@@ -110,14 +110,17 @@ async function autoMigrate() {
         id INT AUTO_INCREMENT PRIMARY KEY,
         user_id INT,
         action VARCHAR(100) NOT NULL,
-        entity_type VARCHAR(50) NOT NULL,
-        entity_id INT,
-        details JSON,
-        ip_address VARCHAR(45),
+        entity_type VARCHAR(50) DEFAULT NULL,
+        entity_id INT DEFAULT NULL,
+        details TEXT,
+        ip_address VARCHAR(45) DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
       ) ENGINE=InnoDB;
     `);
+    try {
+      await db.query('ALTER TABLE audit_logs MODIFY COLUMN details TEXT;');
+    } catch (_) {}
 
     await db.query('SET FOREIGN_KEY_CHECKS = 1;');
     console.log('✅ All 7 tables verified / created successfully.');

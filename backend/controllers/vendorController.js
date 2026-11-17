@@ -1,4 +1,5 @@
 const db = require('../config/db');
+const logAudit = require('../utils/auditLogger');
 
 // Get All Vendors (with optional search and order counts)
 exports.getVendors = async (req, res) => {
@@ -88,10 +89,7 @@ exports.createVendor = async (req, res) => {
     );
 
     // Audit log
-    await db.query(
-      'INSERT INTO audit_logs (user_id, action, details) VALUES (?, ?, ?)',
-      [req.user.id, 'CREATE_VENDOR', `Added vendor: ${vendor_name} (ID: ${result.insertId})`]
-    );
+    await logAudit(req.user.id, 'CREATE_VENDOR', `Added vendor: ${vendor_name} (ID: ${result.insertId})`);
 
     res.status(201).json({
       success: true,

@@ -1,5 +1,6 @@
 const db = require('../config/db');
 const { generatePurchaseOrderPdf } = require('../utils/pdfGenerator');
+const logAudit = require('../utils/auditLogger');
 
 // Helper to generate next unique PO Number safely
 const generatePoNumber = async (connection) => {
@@ -312,10 +313,7 @@ exports.createOrder = async (req, res) => {
     );
 
     // Audit log
-    await connection.query(
-      'INSERT INTO audit_logs (user_id, action, details) VALUES (?, ?, ?)',
-      [req.user.id, 'CREATE_PO', `Created ${poNumber} for vendor ${vendorRows[0].vendor_name} (Total: ₹${grandTotal})`]
-    );
+    await logAudit(req.user.id, 'CREATE_PO', `Created ${poNumber} for vendor ${vendorRows[0].vendor_name} (Total: ₹${grandTotal})`, connection);
 
     // Commit transaction
     await connection.commit();
@@ -564,10 +562,7 @@ exports.updateOrderStatus = async (req, res) => {
     );
 
     // Audit log
-    await connection.query(
-      'INSERT INTO audit_logs (user_id, action, details) VALUES (?, ?, ?)',
-      [user.id, `PO_STATUS_${status.toUpperCase()}`, `PO ${currentOrder.po_number} changed from ${currentOrder.status} to ${status}`]
-    );
+    await logAudit(user.id, `PO_STATUS_${status.toUpperCase()}`, `PO ${currentOrder.po_number} changed from ${currentOrder.status} to ${status}`, connection);
 
     await connection.commit();
 
@@ -606,10 +601,7 @@ exports.deleteOrder = async (req, res) => {
 
     await db.query('DELETE FROM purchase_orders WHERE id = ?', [id]);
 
-    await db.query(
-      'INSERT INTO audit_logs (user_id, action, details) VALUES (?, ?, ?)',
-      [req.user.id, 'DELETE_PO', `Deleted Purchase Order ${order.po_number}`]
-    );
+    await logAudit(req.user.id, 'DELETE_PO', `Deleted Purchase Order ${order.po_number}`);
 
     res.json({ success: true, message: `Purchase order ${order.po_number} deleted successfully.` });
   } catch (error) {

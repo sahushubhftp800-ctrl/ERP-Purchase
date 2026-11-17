@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const db = require('../config/db');
+const logAudit = require('../utils/auditLogger');
 
 // Generate JWT Helper
 const generateToken = (user) => {
@@ -62,10 +63,7 @@ exports.register = async (req, res) => {
     const token = generateToken(newUser);
 
     // Audit log
-    await db.query(
-      'INSERT INTO audit_logs (user_id, action, details) VALUES (?, ?, ?)',
-      [newUser.id, 'USER_REGISTER', `User ${newUser.email} registered with role ${newUser.role}`]
-    );
+    await logAudit(newUser.id, 'USER_REGISTER', `User ${newUser.email} registered with role ${newUser.role}`);
 
     res.status(201).json({
       success: true,
@@ -119,10 +117,7 @@ exports.login = async (req, res) => {
     const token = generateToken(user);
 
     // Audit log
-    await db.query(
-      'INSERT INTO audit_logs (user_id, action, details) VALUES (?, ?, ?)',
-      [user.id, 'USER_LOGIN', `User ${user.email} logged in successfully`]
-    );
+    await logAudit(user.id, 'USER_LOGIN', `User ${user.email} logged in successfully`);
 
     res.json({
       success: true,
