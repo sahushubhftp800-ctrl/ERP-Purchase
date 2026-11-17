@@ -8,6 +8,7 @@ require('dotenv').config();
 
 // Initialize DB pool connection
 const db = require('./config/db');
+const autoMigrate = require('./config/initDb');
 
 // Route Imports
 const authRoutes = require('./routes/authRoutes');
@@ -176,10 +177,11 @@ app.use((err, req, res, next) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`====================================================`);
   console.log(`🚀 ERP Backend API Server is running on port ${PORT}`);
   console.log(`📡 URL: http://localhost:${PORT}`);
   console.log(`📊 Mode: ${process.env.NODE_ENV || 'development'}`);
   console.log(`====================================================`);
+  await autoMigrate();
 });
