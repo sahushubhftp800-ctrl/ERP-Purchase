@@ -1,0 +1,25 @@
+{
+  "name": "erp-purchase-order-system",
+  "version": "1.0.0",
+  "description": "Complete ERP-Based Purchase Order (PO) Management System with Vendor & Product Integration",
+  "scripts": {
+    "setup": "npm --prefix backend install && npm --prefix frontend install",
+    "build": "npm --prefix frontend run build",
+    "start": "node backend/server.js",
+    "test": "node backend/test-suite.js",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev"
+  },
+  "keywords": [
+    "erp",
+    "purchase-order",
+    "procurement",
+    "mysql",
+    "react",
+    "express",
+    "jwt",
+    "full-stack"
+  ],
+  "author": "Antigravity Engineering",
+  "license": "MIT"
+}
