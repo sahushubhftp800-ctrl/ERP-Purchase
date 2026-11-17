@@ -64,7 +64,10 @@ async function autoMigrate() {
         tax_rate DECIMAL(5,2) NOT NULL DEFAULT 5.00,
         tax_amount DECIMAL(12,2) NOT NULL DEFAULT 0.00,
         grand_total DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+        payment_terms VARCHAR(100) DEFAULT 'Net 30 Days',
         notes TEXT,
+        approved_by INT DEFAULT NULL,
+        approved_at TIMESTAMP NULL,
         rejection_reason TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -72,6 +75,11 @@ async function autoMigrate() {
         FOREIGN KEY (created_by) REFERENCES users(id) ON UPDATE CASCADE
       ) ENGINE=InnoDB;
     `);
+
+    // Schema column migrations in case tables were already created
+    try { await db.query('ALTER TABLE purchase_orders ADD COLUMN approved_by INT NULL;'); } catch (_) {}
+    try { await db.query('ALTER TABLE purchase_orders ADD COLUMN approved_at TIMESTAMP NULL;'); } catch (_) {}
+    try { await db.query('ALTER TABLE purchase_orders ADD COLUMN payment_terms VARCHAR(100) DEFAULT "Net 30 Days";'); } catch (_) {}
 
     // 5. purchase_order_items table
     await db.query(`
@@ -94,15 +102,17 @@ async function autoMigrate() {
       CREATE TABLE IF NOT EXISTS order_status_history (
         id INT AUTO_INCREMENT PRIMARY KEY,
         order_id INT NOT NULL,
-        previous_status VARCHAR(50),
-        new_status VARCHAR(50) NOT NULL,
+        status VARCHAR(50) NOT NULL,
         changed_by INT NOT NULL,
-        comments TEXT,
+        comment TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (order_id) REFERENCES purchase_orders(id) ON DELETE CASCADE,
         FOREIGN KEY (changed_by) REFERENCES users(id)
       ) ENGINE=InnoDB;
     `);
+
+    try { await db.query('ALTER TABLE order_status_history ADD COLUMN status VARCHAR(50) NOT NULL;'); } catch (_) {}
+    try { await db.query('ALTER TABLE order_status_history ADD COLUMN comment TEXT;'); } catch (_) {}
 
     // 7. audit_logs table
     await db.query(`
