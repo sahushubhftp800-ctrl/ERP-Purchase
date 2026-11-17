@@ -91,11 +91,14 @@ async function autoMigrate() {
         quantity INT NOT NULL,
         unit_price DECIMAL(12,2) NOT NULL,
         line_total DECIMAL(12,2) NOT NULL,
+        notes VARCHAR(255) DEFAULT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (order_id) REFERENCES purchase_orders(id) ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY (product_id) REFERENCES products(id) ON UPDATE CASCADE
       ) ENGINE=InnoDB;
     `);
+
+    try { await db.query('ALTER TABLE purchase_order_items ADD COLUMN notes VARCHAR(255) DEFAULT NULL;'); } catch (_) {}
 
     // 6. order_status_history table
     await db.query(`
@@ -130,6 +133,9 @@ async function autoMigrate() {
     `);
     try {
       await db.query('ALTER TABLE audit_logs MODIFY COLUMN details TEXT;');
+      await db.query('ALTER TABLE audit_logs MODIFY COLUMN entity_type VARCHAR(50) DEFAULT NULL;');
+      await db.query('ALTER TABLE audit_logs MODIFY COLUMN entity_id INT DEFAULT NULL;');
+      await db.query('ALTER TABLE audit_logs MODIFY COLUMN ip_address VARCHAR(45) DEFAULT NULL;');
     } catch (_) {}
 
     await db.query('SET FOREIGN_KEY_CHECKS = 1;');
